@@ -15,8 +15,8 @@ const uvColorEl = document.getElementById('uv-color')
 // Re-setting the recent searches
 let recentSearches = [];
 
-// Hide this 
-var apiKey = config.openWeatherAPI
+// 
+const apiKey = '7e019b164ecc00ad38ffc5151d499cd0'
 
 // Retrieves the data for the city
 function getOneCallApi(lon, lat) {
