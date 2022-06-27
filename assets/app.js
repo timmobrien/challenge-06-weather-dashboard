@@ -9,12 +9,13 @@ const currentDayWind = document.getElementById('current-day-wind');
 const currentDayUV = document.getElementById('current-day-UV');
 const cardContainer = document.getElementById('card-container');
 const weatherIcon = document.getElementById('weather-icon')
+const uvColorEl = document.getElementById('uv-color')
 
 // Re-setting the recent searches
 let recentSearches = [];
 
 // Hide this 
-var apiKey = config.open_weather_API
+var apiKey = config.openWeatherAPI
 
 // Retrieves the data for the city
 function getOneCallApi(lon, lat) {
@@ -54,28 +55,36 @@ searchForm.addEventListener('submit', function (event) {
 
 // Function that receives weather data and renders it to DOM
 function renderWeatherData(userInput) {
-    
+
     // reset content before rendering again
     cardContainer.innerHTML = "";
-
 
     getWeatherData(userInput)
         .then(function (weatherData) {
             console.log(weatherData)
-            
+
             // current card
             const iconID = weatherData.current.weather[0]['icon'];
             const iconURL = "http://openweathermap.org/img/w/" + iconID + ".png";
             console.log(iconURL)
 
+            const uvIndex = weatherData.current.uvi;
 
             const datetime = moment(weatherData.current.dt, 'X').format("YYYY-MM-DD")
             currentDayCity.innerHTML = `${userInput} ${datetime}`
             currentDayHumidity.textContent = weatherData.current.humidity;
             currentDayTemp.textContent = weatherData.current.temp + 'F';
-            currentDayUV.textContent = weatherData.current.uvi;
+            currentDayUV.textContent = uvIndex;
             currentDayWind.textContent = weatherData.current.wind_speed + ' mp/h'
-            weatherIcon.src = iconURL;        
+            weatherIcon.src = iconURL;
+
+            if (uvIndex<3) {
+                uvColorEl.setAttribute('class', "green")
+            } else if (uvIndex<6) {
+                uvColorEl.setAttribute('class', 'orange')
+            } else {
+                uvColorEl.setAttribute('class','red')
+            };
 
             // 5 Day forecast
             for (let i = 0; i < 5; i++) {
@@ -101,7 +110,10 @@ function renderWeatherData(userInput) {
                 forecastTemp.textContent = "Temp: " + weatherData.daily[i].temp.day + 'F';
                 forecastWind.textContent = "Wind: " + weatherData.daily[i].wind_speed + ' mp/h';
                 forecastHumidity.textContent = "Humidity: " + weatherData.daily[i].humidity;
-                forecastIcon.setAttribute('src', "http://openweathermap.org/img/w/" + weatherData.daily[i].weather[0]['icon'] + ".png" )
+                forecastIcon.setAttribute('src', "http://openweathermap.org/img/w/" + weatherData.daily[i].weather[0]['icon'] + ".png")
+
+                //Humidity colours
+
 
                 // Append the card elements
                 cardText.appendChild(forecastIcon)
@@ -120,7 +132,6 @@ function renderWeatherData(userInput) {
 
             }
         });
-
 }
 
 // When DOM loads, render the recent searches
@@ -133,24 +144,22 @@ function renderSearches() {
 
     // Resetting the content before rendering again
     recentSearchesEl.innerHTML = '';
-    
+
     // Assigning variable to local storage data
     const pastSearches = JSON.parse(localStorage.getItem("recentCities"))
     // if there are past searches, create buttons and append them to DOM
     if (pastSearches !== null) {
         recentSearches = pastSearches;
         for (let i = 0; i < pastSearches.length; i++) {
-        const cityButton = document.createElement("button")
-        cityButton.classList.add('btn', 'btn-primary', 'd-block', 'w-100', 'mt-1');
-        cityButton.setAttribute('type', 'submit');
-        cityButton.setAttribute('id', 'city-button')
-        cityButton.setAttribute('data', pastSearches[i])
-        cityButton.textContent = pastSearches[i];
-        recentSearchesEl.appendChild(cityButton);
+            const cityButton = document.createElement("button")
+            cityButton.classList.add('btn', 'btn-primary', 'd-block', 'w-100', 'mt-1');
+            cityButton.setAttribute('type', 'submit');
+            cityButton.setAttribute('id', 'city-button')
+            cityButton.setAttribute('data', pastSearches[i])
+            cityButton.textContent = pastSearches[i];
+            recentSearchesEl.appendChild(cityButton);
         }
     }
-
-    
 }
 
 // When a recent search is clicked
@@ -160,6 +169,5 @@ $(document).on('click', '#city-button', function (event) {
     const city = $(this).attr('data');
     // render the weather for the city
     renderWeatherData(city);
-
 })
 
