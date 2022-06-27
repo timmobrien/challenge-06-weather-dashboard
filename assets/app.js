@@ -1,3 +1,5 @@
+const config = require('./config');
+
 // Defining elements from DOM to target later
 const searchForm = document.getElementById('search-form');
 const recentSearchesEl = document.getElementById('recent-searches')
